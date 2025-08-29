@@ -1,7 +1,7 @@
-import { Schema, model } from 'mongoose';
-import Counter from "./counter.js";
+const mongoose = require('mongoose');
+const Counter = require("./counter.js");
 
-const schema = Schema({
+const schema = mongoose.Schema({
     userId : Number,
     userName : String,
     userEmail : String,
@@ -21,4 +21,4 @@ schema.pre("save", async function (next) {
   next();
 });
 
-export default model("User", schema, "users");
+module.exports = mongoose.model("User", schema, "users");

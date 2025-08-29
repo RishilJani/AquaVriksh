@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-import Counter from './counter';
+const Counter = require("./counter");
 
 const schema = mongoose.Schema({
     transactionId : Number,

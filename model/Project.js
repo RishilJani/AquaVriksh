@@ -1,7 +1,7 @@
-import { Schema, model } from 'mongoose';
-import Counter from './counter';
+const mongoose = require('mongoose');
+const Counter = require('./counter');
 
-const schema = Schema({
+const schema = mongoose.Schema({
     projectId : Number,
     communityId : Number,
     pName : String,
@@ -22,4 +22,4 @@ schema.pre("save", async function (next) {
   next();
 });
 
-export default model("Project", schema, "projects");
+module.exports = mongoose.model("Project", schema, "projects");
