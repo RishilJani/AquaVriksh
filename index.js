@@ -21,7 +21,7 @@ app.use("/user",userRoute);
 app.use("/badge",badgeRoute);
 app.use("/image",imageRoute);
 
-app.use("/dashboard",)
+app.use("/dashboard", dashboardRoute);
 
 mongoose.connect(CONNECTION_STRING, {
     useNewUrlParser: true,

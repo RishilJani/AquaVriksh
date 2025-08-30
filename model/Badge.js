@@ -4,7 +4,7 @@ const Counter = require("./counter.js");
 const schema = mongoose.Schema({
     badgeId: Number,
     badgeName: String,
-    imageUrl: String,
+    imageUrl: String,       
     badgeDescription: String,
     badgeThreshold: Number
 });

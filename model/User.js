@@ -31,11 +31,12 @@
 // This schema defines the complete user structure with validation and methods
 
 const mongoose = require('mongoose');
+const Counter = require("./counter.js");
 const Image = require('./Image');
 const bcrypt = require('bcryptjs');
 
 // User Schema Definition
-const userSchema = new mongoose.Schema({
+const userSchema = mongoose.Schema({
   userId : Number,
   // Basic Information
   username: {
@@ -43,9 +44,6 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Username is required'],
     unique: true,
     trim: true,
-    minlength: [3, 'Username must be at least 3 characters long'],
-    maxlength: [30, 'Username cannot exceed 30 characters'],
-    match: [/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores']
   },
   
   email: {
@@ -54,27 +52,13 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    match: [/^\w+([.-]?\w+)@\w+([.-]?\w+)(\.\w{2,3})+$/, 'Please enter a valid email address']
   },
 
-  avatar: {
-    type: String,
-    default: '👤',
-    validate: {
-      validator: function(v) {
-        // Allow emoji or valid image URL
-        return /^[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|https?:\/\/.+/.test(v);
-      },
-      message: 'Avatar must be an emoji or valid image URL'
-    }
-  },
-  
   // Authentication
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters long'],
-    select: false // Don't include password in queries by default
+    select: false
   },
   
   // Gamification & Points
@@ -84,67 +68,17 @@ const userSchema = new mongoose.Schema({
     min: [0, 'Points cannot be negative']
   },
   
-  level: {
-    type: String,
-    enum: {
-      values: ['Seed Planter', 'Green Guardian', 'Eco Warrior', 'Mangrove Master'],
-      message: 'Invalid level specified'
-    },
-    default: 'Seed Planter'
-  },
-  
-  streak: {
-    type: Number,
-    default: 0,
-    min: [0, 'Streak cannot be negative']
-  },
-  
-  // Location Information
-  location: {
-    city: {
-      type: String,
-      trim: true,
-      maxlength: [50, 'City name cannot exceed 50 characters']
-    },
-    state: {
-      type: String,
-      trim: true,
-      maxlength: [50, 'State name cannot exceed 50 characters']
-    },
-    country: {
-      type: String,
-      trim: true,
-      maxlength: [50, 'Country name cannot exceed 50 characters']
-    },
-    coordinates: {
-      latitude: {
-        type: Number,
-        min: [-90, 'Latitude must be between -90 and 90'],
-        max: [90, 'Latitude must be between -90 and 90']
-      },
-      longitude: {
-        type: Number,
-        min: [-180, 'Longitude must be between -180 and 180'],
-        max: [180, 'Longitude must be between -180 and 180']
-      }
-    }
-  },
   
   // Badges & Achievements
   badges: [Number],
 
   // imageIds
-  listOfReports : [Number],
+  listOfImages : [Number],
 
   joinDate: {
     type: String,
     default: Date.now
   },
-  
-  // lastActive: {
-  //   type: Date,
-  //   default: Date.now
-  // }
     
 }, {
   toJSON: { virtuals: true }, // Include virtuals when converting to JSON
@@ -164,43 +98,44 @@ userSchema.pre("save", async function (next) {
 });
 
 // Virtual for calculating level based on points
-userSchema.virtual('calculatedLevel').get(function() {
-  if (this.points >= 1500) return 'Mangrove Master';
-  if (this.points >= 1000) return 'Eco Warrior';
-  if (this.points >= 500) return 'Green Guardian';
-  return 'Seed Planter';
-});
+// userSchema.virtual('calculatedLevel').get(function() {
+//   if (this.points >= 1500) return 'Mangrove Master';
+//   if (this.points >= 1000) return 'Eco Warrior';
+//   if (this.points >= 500) return 'Green Guardian';
+//   return 'Seed Planter';
+// });
 
 // Virtual for calculating success rate
-userSchema.virtual('calculatedSuccessRate').get(async function() {
-  const img = await  Image.find({userId : this.userId });
-  console.log("Img === ", img);
-  console.log("Size ==== ",img.length);
-  const totalReport = img.length;
-  var verifiedReports = img.reduce((acc,cVal, cIndex ) => cVal.isApproved ? acc+1 : acc + 0,0);
-  if (totalProcessed === 0) return 0;
-  return Math.round((verifiedReports / totalReport) * 100);
-});
+// userSchema.virtual('calculatedSuccessRate').get(async function() {
+//   const img = await  Image.find({userId : this.userId });
+//   console.log("Img === ", img);
+//   console.log("Size ==== ",img.length);
+//   const totalReport = img.length;
+//   var verifiedReports = img.reduce((acc,cVal, cIndex ) => cVal.isApproved ? acc+1 : acc + 0,0);
+//   if (totalProcessed === 0) return 0;
+//   return Math.round((verifiedReports / totalReport) * 100);
+// });
 
-// Virtual for next level progress
-userSchema.virtual('nextLevelProgress').get(function() {
-  const levelThresholds = {
-    'Seed Planter': 500,
-    'Green Guardian': 1000,
-    'Eco Warrior': 1500,
-    'Mangrove Master': Infinity
-  };
+// // Virtual for next level progress
+// userSchema.virtual('nextLevelProgress').get(function() {
+//   const levelThresholds = {
+//     'Seed Planter': 500,
+//     'Green Guardian': 1000,
+//     'Eco Warrior': 1500,
+//     'Mangrove Master': Infinity
+//   };
   
-  const currentThreshold = levelThresholds[this.level];
-  const nextThreshold = levelThresholds[this.calculatedLevel];
+//   const currentThreshold = levelThresholds[this.level];
+//   const nextThreshold = levelThresholds[this.calculatedLevel];
   
-  if (nextThreshold === Infinity) return 100;
+//   if (nextThreshold === Infinity) return 100;
   
-  const progress = ((this.points - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
-  return Math.max(0, Math.min(100, progress));
-});
+//   const progress = ((this.points - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+//   return Math.max(0, Math.min(100, progress));
+// });
 
 // Pre-save middleware to hash password
+
 userSchema.pre('save', async function(next) {
   // Only hash password if it's modified
   if (!this.isModified('password')) return next();
