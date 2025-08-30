@@ -5,8 +5,12 @@ const schema = mongoose.Schema({
   imageId : Number,
   imageURL : String,
   userId : Number,
-  isApproved : Boolean,
+  isApproved : Boolean, // true : verified, false : rejected , null : pending
   date : String,
+  pointsEarned : {
+    type : Number,
+    default : 0
+  }
 });
 
 schema.pre("save", async function (next) {

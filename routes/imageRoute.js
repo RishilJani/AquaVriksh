@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.get("/:id", async (req, res) => {
     try {
-        const images = await Image.find({ userId: req.params.id });
+        const images = await Image.find({ userId: req.params.id })  ;
         if (!images) return res.status(404).json({ error: "Images not found" });
 
         res.json(images);
@@ -23,9 +23,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.put("/", async (req, res) =>{
-    
-});
+
 
 
 module.exports = router;

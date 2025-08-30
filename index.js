@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const userRoute = require("./routes/userRoute");
 const badgeRoute = require("./routes/badgeRoute");
 const imageRoute = require("./routes/imageRoute");
+const dashboardRoute = require("./routes/dashboardRoute");
 const cors = require("cors")
 
 dotenv.config();
@@ -20,12 +21,14 @@ app.use("/user",userRoute);
 app.use("/badge",badgeRoute);
 app.use("/image",imageRoute);
 
+app.use("/dashboard",)
 
 mongoose.connect(CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
         console.log("MongoDB connected successfully");
+    
     })
     .catch((err) => {
         console.error("MongoDB connection error:", err);
