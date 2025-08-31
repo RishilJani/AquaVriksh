@@ -102,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -120,28 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 sm:p-4">
           {/* Logo and Close Button */}
                       <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div className="flex items-center">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h1 className="text-base sm:text-lg font-bold text-teal-600">AquaVriksh</h1>
-              </div>
-            
-            {/* Close Button for Mobile */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering sidebar toggle
-                if (onClose) onClose();
-              }}
-              className="lg:hidden p-1 rounded-lg hover:bg-teal-50 transition-colors"
-              aria-label="Close menu"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              
             
             {/* Inside Arrow Button to Close Sidebar */}
             <button

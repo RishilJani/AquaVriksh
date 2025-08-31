@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
+import { loginUser, createUserData } from '../../utils/auth';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -52,28 +51,64 @@ export default function SignupPage() {
         return;
       }
 
-      // Simulate API call - replace with actual signup API
-      console.log('Signup attempt:', formData);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create user data
-      const userData = {
+      // Prepare signup data
+      const signupData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
-        name: `${formData.firstName} ${formData.lastName}`,
         username: formData.username,
-        isLoggedIn: true
+        password: formData.password
       };
+
+      // Make API call to signup endpoint
+      const response = await fetch(process.env.NEXT_PUBLIC_SERVER + "/user/signup", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(signupData)
+      });
+
+      const res = await response.json();
+
+      if (response.status !== 200) {
+        // Handle different error cases
+        if (response.status === 409) {
+          setError('User already exists with this email or username');
+        } else if (response.status === 400) {
+          setError(res.message || 'Invalid data provided');
+        } else {
+          setError(res.message || 'Signup failed. Please try again.');
+        }
+        return;
+      }
+
+      // Handle response structure
+      let data;
+      if (res.message === "done" && res.data) {
+        data = res.data;
+      } else {
+        data = res; // Direct response
+      }
+
+      // Signup successful
+      console.log('Signup successful:', data);
+      console.log('Server response structure:', JSON.stringify(data, null, 2));
       
-      // Use AuthContext to login
-      login(userData);
+      // Create user data for localStorage
+      const userData = createUserData(data, formData.email, `${formData.firstName} ${formData.lastName}`);
+      
+      console.log('Created userData for localStorage:', userData);
+      
+      // Save user data to localStorage
+      loginUser(userData);
       
       // Navigate to dashboard
       router.push('/');
       
     } catch (err) {
-      setError('Signup failed. Please try again.');
+      console.error('Signup error:', err);
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

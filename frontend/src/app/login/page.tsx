@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
+import { loginUser, createUserData } from '../../utils/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,31 +20,69 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Simulate API call - replace with actual login API
-      console.log('Login attempt:', { email, password, rememberMe });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, accept any email/password combination
-      if (email && password) {
-        // Create user data
-        const userData = {
-          email,
-          name: email.split('@')[0], // Use email prefix as name for demo
-          isLoggedIn: true
-        };
-        
-        // Use AuthContext to login
-        login(userData);
-        
-        // Navigate to dashboard
-        router.push('/');
-      } else {
+      // Validate form data
+      if (!email || !password) {
         setError('Please enter both email and password');
+        return;
       }
+
+      // Prepare login data
+      const loginData = {
+        email: email,
+        password: password
+      };
+
+      // Make API call to login endpoint
+      const response = await fetch(process.env.NEXT_PUBLIC_SERVER + "/user/login", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData)
+      });
+
+      const res = await response.json();
+
+      if (response.status !== 200) {
+        // Handle different error cases
+        if (response.status === 401) {
+          setError('Invalid email or password');
+        } else if (response.status === 404) {
+          setError('User not found');
+        } else if (response.status === 400) {
+          setError(res.message || 'Invalid data provided');
+        } else {
+          setError(res.message || 'Login failed. Please try again.');
+        }
+        return;
+      }
+
+      // Handle response structure
+      let data;
+      if (res.message === "done" && res.data) {
+        data = res.data;
+      } else {
+        data = res; // Direct response
+      }
+
+      // Login successful
+      console.log('Login successful:', data);
+      console.log('Server response structure:', JSON.stringify(data, null, 2));
+      
+      // Create user data for localStorage
+      const userData = createUserData(data, email);
+      
+      console.log('Created userData for localStorage:', userData);
+      
+      // Save user data to localStorage
+      loginUser(userData);
+      
+      // Navigate to dashboard
+      router.push('/');
+      
     } catch (err) {
-      setError('Login failed. Please try again.');
+      console.error('Login error:', err);
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

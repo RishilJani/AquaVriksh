@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../contexts/AuthContext';
+import { getUser, logoutUser } from '../utils/auth';
 
 interface HeaderProps {
   title?: string;
@@ -13,18 +13,19 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  title = "Blue Carbon Ecosystem Platform",
-  subtitle = "Empowering communities for sustainable coastal conservation",
+  title = "AquaVriksh",
+  subtitle = "Save the globe.",
   onMenuClick,
   showSidebarButton = false,
   onSidebarOpen
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const user = getUser();
 
   const handleLogout = () => {
-    logout();
+    logoutUser();
+    router.push('/login');
     setShowUserMenu(false);
   };
 
@@ -41,15 +42,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3">
         <div className="flex items-center">
           {/* Menu Button */}
-          <button
-            onClick={onMenuClick}
-            className="mr-2 sm:mr-4 p-1 sm:p-2 rounded-lg hover:bg-teal-50 transition-colors lg:hidden"
-            aria-label="Toggle menu"
-          >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          
           
           {/* Outside Arrow Button to Open Sidebar */}
           {showSidebarButton && (
@@ -66,8 +59,8 @@ const Header: React.FC<HeaderProps> = ({
           )}
           
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h2>
-            <p className="text-xs sm:text-sm text-gray-600">{subtitle}</p>
+            <h2 className="text-3xl sm:text-2xl font-bold text-teal-600 fw-700">{title}</h2>
+            <p className="hidden sm:visible text-xs sm:text-sm text-gray-600">{subtitle}</p>
           </div>
         </div>
         
