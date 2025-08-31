@@ -1,11 +1,15 @@
 const express = require('express');
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const cors = require("cors")
+
 const userRoute = require("./routes/userRoute");
 const badgeRoute = require("./routes/badgeRoute");
 const imageRoute = require("./routes/imageRoute");
+
 const dashboardRoute = require("./routes/dashboardRoute");
-const cors = require("cors")
+const leaderboardRoute = require("./routes/leaderboardRoute");
+
 
 dotenv.config();
 
@@ -22,11 +26,9 @@ app.use("/badge",badgeRoute);
 app.use("/image",imageRoute);
 
 app.use("/dashboard", dashboardRoute);
+app.use("/leaderboard", leaderboardRoute);
 
-mongoose.connect(CONNECTION_STRING, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+mongoose.connect(CONNECTION_STRING).then(() => {
         console.log("MongoDB connected successfully");
     
     })

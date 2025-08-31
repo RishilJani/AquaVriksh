@@ -5,7 +5,7 @@ const schema = mongoose.Schema({
   imageId : Number,
   imageURL : String,
   userId : Number,
-  isApproved : Boolean, // true : verified, false : rejected , null : pending
+  isApproved : Boolean,
   date : String,
   pointsEarned : {
     type : Number,
