@@ -2,6 +2,7 @@ const express = require("express");
 const moment = require('moment');
 const Image = require("../model/Image");
 const User = require("../model/User");
+const Badge = require("../model/Badge");
 const router = express.Router();
 
 router.get("/:id", async (req, res) => {
@@ -33,8 +34,8 @@ router.post("/:id", async (req, res) => {
         await image.save();
 
 
-        AI_Check(image, req.params.id);
-
+        await AI_Check(image, req.params.id);
+        
         res.json({ message: "Image created", image });
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -75,15 +76,15 @@ async function AI_Check(image, id,) {
                 flag = true;
             }
         }
-        if(flag){
+        if (flag) {
             let max = -1, confidence = 0;
             for (var obj of result.outputs[0].predictions.predictions) {
                 let temp = bad.indexOf(obj.class);
-                console.log("class = ", obj.class , " temp = " + temp);
-                if(temp == -1){
+                // console.log("class = ", obj.class, " temp = " + temp);
+                if (temp == -1) {
                     continue;
                 }
-                if(max == -1 || max < mypoints[temp]){
+                if (max == -1 || max < mypoints[temp]) {
                     max = mypoints[temp];
                     confidence = obj.confidence;
                 }
@@ -91,23 +92,38 @@ async function AI_Check(image, id,) {
             image.pointsEarned += Math.round(max * confidence);
 
             console.log("\n\nTotal Points = ", image.pointsEarned);
-            
+
             image.isApproved = true;
             const user = await User.findOneAndUpdate(
                 { userId: id },
-                { $inc : {points : image.pointsEarned}},
-                { $push : {listOfImages : image.imageId}}
+                { $inc: { points: image.pointsEarned } },
+                { $push: { listOfImages: image.imageId } }
             );
+            let badges = Badge.find();
+                let li = [];
+                for(var i of badges){
+                    if(user.points >= i.badgeThreshold)
+                            li.push(i.badgeId);
+                }
+                user.badges = li;
             await image.save();
             await user.save();
         }
-        else{
+        else {
             image.isApproved = false;
-            const user = await User.findOneAndUpdate(
-                { userId: id },
-                { $push : {listOfImages : image.imageId}}
-            );
-            await user.save();
+            try {
+                console.log("Id = " , id);
+                
+                const user = await User.findOneAndUpdate(
+                    { userId: id },
+                    { $push: { listOfImages: image.imageId } }
+                );
+                
+                await user.save();
+            }catch(e){
+                console.log("err = ",e);
+            }
+            
             await image.save();
         }
     } catch (err) {
